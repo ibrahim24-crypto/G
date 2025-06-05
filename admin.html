@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Visitor Analytics - Admin Panel</title>
+    <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      text-align: center;
+      padding: 30px 0;
+      margin-bottom: 30px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      transition: all 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+    
+    .card {
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .card h2 {
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+      color: #64b5f6;
+      display: flex;
+      align-items: center;
+    }
+    
+    .card h2 i {
+      margin-right: 10px;
+    }
+    
+    .metric-value {
+      font-size: 3.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 20px 0;
+      color: #4fc3f7;
+      text-shadow: 0 0 15px rgba(79, 195, 247, 0.5);
+    }
+    
+    .metric-label {
+      text-align: center;
+      opacity: 0.8;
+      font-size: 1.1rem;
+    }
+    
+    .chart-container {
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 40px;
+    }
+    
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .visitor-list {
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .visitor-list h2 {
+      margin-bottom: 20px;
+      color: #64b5f6;
+    }
+    
+    .visitor-item {
+      padding: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .visitor-item:last-child {
+      border-bottom: none;
+    }
+    
+    .visitor-id {
+      font-weight: bold;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .visitor-status {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin: 0 15px;
+    }
+    
+    .visitor-new {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4CAF50;
+    }
+    
+    .visitor-returning {
+      background: rgba(33, 150, 243, 0.2);
+      color: #2196F3;
+    }
+    
+    .visitor-info {
+      display: flex;
+      align-items: center;
+      min-width: 180px;
+      justify-content: flex-end;
+    }
+    
+    .visitor-visits {
+      background: rgba(255, 193, 7, 0.2);
+      color: #FFC107;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin-right: 10px;
+    }
+    
+    .visitor-time {
+      font-size: 0.85rem;
+      opacity: 0.7;
+      min-width: 160px;
+      text-align: right;
+    }
+    
+    .refresh-btn {
+      padding: 8px 20px;
+      background: rgba(79, 195, 247, 0.2);
+      color: #4fc3f7;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+      border: 1px solid rgba(79, 195, 247, 0.3);
+    }
+    
+    .refresh-btn:hover {
+      background: rgba(79, 195, 247, 0.3);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 30px;
+      font-size: 1.2rem;
+    }
+    
+    @media (max-width: 768px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+      
+      .visitor-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .visitor-info {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Votre HTML existant pour la mise en page des metrics et de la liste -->
+  <div class="container">
+    <header>
+      <h1>Visitor Analytics Dashboard</h1>
+      <p class="subtitle">Track and analyze visitor activity for the Screen Clicker game</p>
+      <a href="index.html" class="back-link">← Back to Game</a>
+    </header>
+    <!-- ... vos cartes “Total Visits”, “Unique Visitors”, etc. ... -->
+    <div class="chart-container">
+      <div class="chart-header">
+        <h2>Recent Visitors</h2>
+        <button class="refresh-btn" id="refreshBtn">Refresh Data</button>
+      </div>
+      <div class="visitor-list" id="visitorList">
+        <div class="loading">Loading visitor data...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK + Script pour lire analytics et visitors -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      collection, 
+      getDocs 
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    // Config screen-clicker
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcxCO_FdIaEzXKpHiwWwTxNt7ZRGwcyl8",
+      authDomain: "screen-clicker.firebaseapp.com",
+      projectId: "screen-clicker",
+      storageBucket: "screen-clicker.appspot.com",
+      messagingSenderId: "627573962958",
+      appId: "1:627573962958:web:048f2577e436a30cf3389f",
+      measurementId: "G-W3C5Y2YPBV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Sélection des éléments DOM
+    const totalVisitsEl = document.getElementById("totalVisits");
+    const uniqueVisitorsEl = document.getElementById("uniqueVisitors");
+    const returningVisitorsEl = document.getElementById("returningVisitors");
+    const visitorListEl = document.getElementById("visitorList");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    // Fonction pour rafraîchir les données
+    async function updateAnalyticsDisplay() {
+      visitorListEl.innerHTML = '<div class="loading">Loading visitor data...</div>';
+
+      try {
+        // 1) Récupérer analytics/visitorData
+        const analyticsRef = doc(db, "analytics", "visitorData");
+        const analyticsSnap = await getDoc(analyticsRef);
+        if (analyticsSnap.exists()) {
+          const data = analyticsSnap.data();
+          const total = data.totalVisits || 0;
+          const unique = data.uniqueVisitors || 0;
+          const returning = total - unique;
+          totalVisitsEl.textContent = total;
+          uniqueVisitorsEl.textContent = unique;
+          returningVisitorsEl.textContent = returning;
+        }
+
+        // 2) Récupérer tous les documents de la collection “visitors”
+        const visitorsRef = collection(db, "visitors");
+        const visitorsSnap = await getDocs(visitorsRef);
+
+        visitorListEl.innerHTML = ""; // vide la liste avant d’ajouter
+
+        // On transforme les docs en tableau pour trier par date (desc)
+        const visitors = [];
+        visitorsSnap.forEach(docSnap => {
+          visitors.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        visitors.sort((a, b) => {
+          if (!a.lastVisit || !b.lastVisit) return 0;
+          return b.lastVisit.toDate() - a.lastVisit.toDate();
+        });
+
+        // On affiche chaque visiteur
+        visitors.forEach(visitor => {
+          const item = document.createElement("div");
+          item.className = "visitor-item";
+
+          const statusHTML = visitor.isNew
+            ? `<span class="visitor-status visitor-new">New</span>`
+            : `<span class="visitor-status visitor-returning">Returning</span>`;
+
+          const time = visitor.lastVisit
+            ? new Date(visitor.lastVisit.toDate()).toLocaleString()
+            : "Unknown time";
+
+          item.innerHTML = `
+            <div class="visitor-id">${visitor.id}</div>
+            <div class="visitor-info">
+              <div class="visitor-visits">${visitor.visits || 1} visits</div>
+              ${statusHTML}
+              <div class="visitor-time">${time}</div>
+            </div>
+          `;
+          visitorListEl.appendChild(item);
+        });
+
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+        visitorListEl.innerHTML = '<div class="loading">Error loading data. Please try again.</div>';
+      }
+    }
+
+    refreshBtn.addEventListener("click", updateAnalyticsDisplay);
+    updateAnalyticsDisplay();
+  </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Leaderboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    #leaderboard {
+      list-style: none;
+      padding: 0;
+      margin: 20px auto;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    #leaderboard li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    #leaderboard li:last-child {
+      border-bottom: none;
+    }
+    .rank {
+      font-weight: bold;
+      color: #333;
+    }
+    .username {
+      flex: 1;
+      text-align: center;
+      color: #555;
+    }
+    .score {
+      font-weight: bold;
+      color: #2d87f0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Game Leaderboard</h1>
+  <ul id="leaderboard"><li>Loading…</li></ul>
+
+  <script type="module">
+    // Importez Firebase Firestore depuis CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      query, 
+      orderBy, 
+      limit, 
+      getDocs 
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    // Config screen-clicker
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcxCO_FdIaEzXKpHiwWwTxNt7ZRGwcyl8",
+      authDomain: "screen-clicker.firebaseapp.com",
+      projectId: "screen-clicker",
+      storageBucket: "screen-clicker.appspot.com",
+      messagingSenderId: "627573962958",
+      appId: "1:627573962958:web:048f2577e436a30cf3389f",
+      measurementId: "G-W3C5Y2YPBV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadLeaderboard() {
+      const listEl = document.getElementById("leaderboard");
+      listEl.innerHTML = "<li>Loading…</li>";
+
+      try {
+        const q = query(collection(db, "users"), orderBy("highScore", "desc"), limit(10));
+        const snap = await getDocs(q);
+        listEl.innerHTML = ""; // vide l’état “Loading…”
+
+        let rank = 1;
+        snap.forEach((doc) => {
+          const data = doc.data();
+          const user = data.username || "Anonymous";
+          const score = data.highScore || 0;
+
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <span class="rank">#${rank}</span>
+            <span class="username">${user}</span>
+            <span class="score">${score}</span>
+          `;
+          listEl.appendChild(li);
+          rank++;
+        });
+
+        if (rank === 1) {
+          listEl.innerHTML = "<li>No scores yet.</li>";
+        }
+      } catch (err) {
+        console.error("Failed to load leaderboard:", err);
+        listEl.innerHTML = "<li>Error loading leaderboard.</li>";
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", loadLeaderboard);
+  </script>
+</body>
+</html>

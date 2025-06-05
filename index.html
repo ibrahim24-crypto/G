@@ -1,0 +1,214 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Screen Clicker Game</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: black;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    .score-board {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 24px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .visitor-status {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      font-size: 14px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px 12px;
+      border-radius: 5px;
+      z-index: 10;
+    }
+    .combo-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: yellow;
+      font-size: 48px;
+      display: none;
+      text-shadow: 0 0 10px rgba(255, 255, 0, 0.7);
+      z-index: 20;
+    }
+    .level-up-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: gold;
+      font-size: 72px;
+      display: none;
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+      z-index: 20;
+    }
+  </style>
+</head>
+<body>
+  <div class="score-board">
+    Score: <span id="score">0</span><br>
+    Highscore: <span id="highscore">0</span>
+  </div>
+  <div class="visitor-status" id="visitorStatus">
+    <span>Checking visitor...</span>
+  </div>
+  <div class="combo-message" id="comboMessage"></div>
+  <div class="level-up-message" id="levelUpMessage"></div>
+  <canvas id="canvas"></canvas>
+
+  <!-- Charge les modules JS -->
+  <script type="module">
+    // 1) Importer 1 seule fois les fonctions depuis db.js
+    import {
+      loadHighscore,
+      saveHighscore,
+      trackVisitor,
+      highscore as hsRef
+    } from './db.js';
+
+    // 2) Charger le highscore global et démarrer le suivi
+    await loadHighscore();           // Remplit la variable `highscore`
+    trackVisitor();                  // Suit le joueur (prompt si nécessaire)
+
+    // 3) Code du jeu (canvas, score, combo, etc.)
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let score = 0;
+    let comboCount = 0;
+    let lastClickTime = Date.now();
+    const comboTimeout = 500;
+    let currentComboColor = 'red';
+    let maxComboRange = 0;
+    let rainbowMode = false;
+    let hue = 0;
+    let circles = [];
+
+    // Taille canvas
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    function getCircleColor(combo) {
+      if (rainbowMode) {
+        hue = (hue + 1) % 360;
+        return `hsl(${hue}, 100%, 50%)`;
+      }
+      const colors = ['red','green','cyan','orange','yellow','purple','pink','brown','gray'];
+      const currentRange = Math.floor(combo/10);
+      if (combo >= 0 && currentRange > maxComboRange) {
+        maxComboRange = currentRange;
+        currentComboColor = colors[Math.min(currentRange, colors.length-1)];
+      }
+      return currentComboColor;
+    }
+
+    function drawCircles() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      circles.forEach((circle, idx) => {
+        const circleColor = getCircleColor(comboCount);
+        ctx.beginPath();
+        ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI*2);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = circleColor;
+        ctx.stroke();
+        ctx.closePath();
+
+        circle.radius += 1;
+        circle.opacity -= 0.02;
+        circle.age += 1;
+        if (circle.age > 60 || circle.opacity <= 0) {
+          circles.splice(idx, 1);
+        }
+      });
+    }
+
+    function createCircles(x,y,count,interval) {
+      let i=0;
+      const id = setInterval(() => {
+        if (i < count) {
+          circles.push({ x, y, radius: 5, opacity: 1, age: 0 });
+          i++;
+        } else {
+          clearInterval(id);
+        }
+      }, interval);
+    }
+
+    function showComboMessage(combo) {
+      const el = document.getElementById('comboMessage');
+      el.innerText = `Combo x${combo}!`;
+      if (combo >= 3) {
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 1000);
+      }
+    }
+
+    function showLevelUpMessage() {
+      const el = document.getElementById('levelUpMessage');
+      el.innerText = "Well Done! Level Up!";
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 2000);
+    }
+
+    // Écouteur de clics
+    canvas.addEventListener('click', async (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const now = Date.now();
+      if (now - lastClickTime > comboTimeout) comboCount = 0;
+      comboCount++;
+      lastClickTime = now;
+
+      if (comboCount >= 3) showComboMessage(comboCount);
+      if (comboCount === 100 && !rainbowMode) {
+        rainbowMode = true;
+        showLevelUpMessage();
+      }
+
+      score++;
+      document.getElementById('score').innerText = score;
+
+      // ** Sauvegarde du highscore si nouveau record **
+      if (score > hsRef) {
+        await saveHighscore(score);
+        document.getElementById('highscore').innerText = score;
+      }
+
+      createCircles(x,y,5,100);
+    });
+
+    function gameLoop() {
+      drawCircles();
+      requestAnimationFrame(gameLoop);
+    }
+    gameLoop();
+  </script>
+</body>
+</html>
