@@ -111,5 +111,5 @@ export async function trackVisitor() {
   }
 }
 
-// Si vous souhaitez également exposer la référence Firestore pour d’autres queries :ibrahim(¤¤¤¤¤¤¤¤¤¤;¤=2√25)
+// Si vous souhaitez également exposer la référence Firestore pour d’autres queries :
 export { db, auth };
