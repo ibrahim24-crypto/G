@@ -1,95 +1,421 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign Up | Screen Clicker</title>
-
-  <!-- Tailwind CSS pour le style rapide -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Firebase App (core SDK) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <!-- Firebase Authentication -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <!-- Firebase Firestore -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-  <!-- Font Awesome pour les icônes -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
+  <title>Inscription</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    /* ---------- GRADIENT ANIMÉ EN ARRIÈRE-PLAN (BG) ---------- */
-    @keyframes animatedGradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    * {
+      box-sizing: border-box;
     }
+    
     body {
+      background: linear-gradient(135deg, #1a1f2c, #0d1117);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       margin: 0;
-      padding: 0;
-      min-height: 100vh;
+      color: #e2e8f0;
+      padding: 20px;
+    }
+    
+    .form-wrapper {
+      background: rgba(17, 24, 39, 0.9);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       overflow: hidden;
-      font-family: 'Poppins', sans-serif;
-      color: #333;
-      position: relative;
-    }
-    /* Le pseudo-élément prend tout l’écran, sous le contenu */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: linear-gradient(135deg, #667eea, #764ba2, #667eea);
-      background-size: 400% 400%;
-      animation: animatedGradient 15s ease infinite;
-      z-index: -1;
-    }
-
-    /* ---------- EFFET “GRADIENT BORDER” SUR LE CONTENEUR ---------- */
-    .gradient-border {
-      position: relative;
-      border-radius: 1rem;
-    }
-    .gradient-border::before {
-      content: "";
-      position: absolute;
-      top: -2px; left: -2px; right: -2px; bottom: -2px;
-      border-radius: inherit;
-      background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
-      background-size: 400% 400%;
-      animation: animatedGradient 8s ease infinite;
-      z-index: -1;
-    }
-
-    /* ---------- CONTENEUR “GLASS” ---------- */
-    .form-container {
-      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(99, 102, 241, 0.2);
       backdrop-filter: blur(10px);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-      border-radius: 1rem;
+    }
+    
+    .form-container {
+      padding: 2.5rem;
+    }
+    
+    .text-center {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    
+    .logo-container {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+    }
+    
+    .logo-container i {
+      font-size: 2.5rem;
+      color: white;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0;
+      color: #f1f5f9;
+      letter-spacing: -0.5px;
+    }
+    
+    .subtitle {
+      color: #94a3b8;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.75rem;
+      position: relative;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+    
+    .input-container {
+      position: relative;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+    
+    input {
+      width: 100%;
+      padding: 14px 20px 14px 50px;
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      color: #f1f5f9;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+    }
+    
+    input::placeholder {
+      color: #64748b;
+    }
+    
+    /* Correction spécifique pour l'icône œil */
+    .password-container {
+      position: relative;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+    
+    .password-toggle:hover {
+      color: #e2e8f0;
+    }
+    
+    .error-message {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #f87171;
+      display: none;
+    }
+    
+    .remember-forgot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1.5rem 0 2rem;
+    }
+    
+    .remember-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .remember-container input {
+      width: auto;
+      margin-right: 8px;
+    }
+    
+    .remember-container label {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+    
+    .forgot-password {
+      color: #818cf8;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+    
+    .forgot-password:hover {
+      color: #6366f1;
+      text-decoration: underline;
+    }
+    
+    .submit-button {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);
       position: relative;
       overflow: hidden;
     }
-
-    /* ---------- FOCUS SUR INPUT ---------- */
-    .input-field:focus {
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    
+    .submit-button:hover {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4);
     }
-
-    /* ---------- ANIMATION SHAKE pour erreur ---------- */
-    .error-message {
-      animation: shake 0.5s;
+    
+    .submit-button:active {
+      transform: translateY(0);
     }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-5px); }
-      40%, 80% { transform: translateX(5px); }
+    
+    .submit-button .spinner {
+      display: none;
+      margin-left: 10px;
+    }
+    
+    .submit-button.loading .spinner {
+      display: inline-block;
+    }
+    
+    .submit-button.loading .button-text {
+      opacity: 0.8;
+    }
+    
+    .error-container {
+      margin-top: 1.5rem;
+      background: rgba(220, 38, 38, 0.1);
+      padding: 16px;
+      border-radius: 12px;
+      border-left: 4px solid #ef4444;
+      display: none;
+    }
+    
+    .error-container .error-content {
+      display: flex;
+      align-items: center;
+    }
+    
+    .error-container i {
+      color: #ef4444;
+      font-size: 1.3rem;
+      margin-right: 12px;
+    }
+    
+    .error-container p {
+      margin: 0;
+      color: #fecaca;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 2rem;
+      color: #94a3b8;
+      font-size: 1rem;
+    }
+    
+    .login-link a {
+      color: #818cf8;
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 6px;
+      transition: color 0.2s;
+    }
+    
+    .login-link a:hover {
+      color: #6366f1;
+      text-decoration: underline;
+    }
+    
+    /* Animation pour les champs */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.5); }
+      70% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+    }
+    
+    input:focus {
+      animation: pulse 1.5s infinite;
+    }
+    
+    /* Responsive */
+    @media (max-width: 480px) {
+      .form-container {
+        padding: 1.8rem;
+      }
+      
+      .logo-container {
+        width: 80px;
+        height: 80px;
+      }
+      
+      h1 {
+        font-size: 1.7rem;
+      }
+      
+      input {
+        padding: 13px 15px 13px 45px;
+      }
+      
+      .password-toggle {
+        right: 12px;
+      }
     }
   </style>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+  <div class="form-wrapper">
+    <div class="form-container">
+      <!-- En-tête du formulaire -->
+      <div class="text-center">
+        <div class="logo-container">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <h1>Créer un compte</h1>
+        <p class="subtitle">Rejoignez notre communauté dès aujourd'hui</p>
+      </div>
+
+      <!-- Formulaire d'inscription -->
+      <form id="signupForm">
+        <!-- Nom d'utilisateur -->
+        <div class="form-group">
+          <label for="username">Nom d'utilisateur</label>
+          <div class="input-container">
+            <i class="fas fa-user input-icon"></i>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              required 
+              placeholder="Votre nom d'utilisateur"
+            />
+          </div>
+          <p id="usernameError" class="error-message">Le nom d'utilisateur doit contenir au moins 3 caractères.</p>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Adresse e-mail</label>
+          <div class="input-container">
+            <i class="fas fa-envelope input-icon"></i>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              required 
+              placeholder="exemple@email.com"
+            />
+          </div>
+          <p id="emailError" class="error-message">Veuillez entrer une adresse e-mail valide.</p>
+        </div>
+
+        <!-- Mot de passe - Correction de l'icône œil ici -->
+        <div class="form-group">
+          <label for="pswd">Mot de passe</label>
+          <div class="input-container password-container">
+            <i class="fas fa-lock input-icon"></i>
+            <input 
+              type="password" 
+              id="pswd" 
+              name="password" 
+              required 
+              placeholder="••••••••"
+            />
+            <button type="button" class="password-toggle" id="togglePassword">
+              <i class="fas fa-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+          <p id="passwordError" class="error-message">Le mot de passe doit contenir au moins 6 caractères.</p>
+        </div>
+
+        <!-- Se souvenir de moi et mot de passe oublié -->
+        <div class="remember-forgot">
+          <div class="remember-container">
+            <input type="checkbox" id="remember-me" name="remember-me">
+            <label for="remember-me">Se souvenir de moi</label>
+          </div>
+          <a href="#" class="forgot-password" id="forgotPassword">Mot de passe oublié ?</a>
+        </div>
+
+        <!-- Bouton de soumission -->
+        <button type="submit" class="submit-button" id="submitBtn">
+          <span class="button-text">Créer mon compte</span>
+          <i class="fas fa-spinner fa-spin spinner"></i>
+        </button>
+
+        <!-- Message d'erreur général -->
+        <div class="error-container" id="errorMessage">
+          <div class="error-content">
+            <i class="fas fa-exclamation-circle"></i>
+            <p id="errorText">Une erreur est survenue. Veuillez réessayer.</p>
+          </div>
+        </div>
+
+        <!-- Lien vers la connexion -->
+        <div class="login-link">
+          Vous avez déjà un compte ? <a href="login.html">Se connecter</a>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script>
-    // --------- CONFIGURATION FIREBASE ---------
+    // Configuration Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCcxCO_FdIaEzXKpHiwWwTxNt7ZRGwcyl8",
       authDomain: "screen-clicker.firebaseapp.com",
@@ -98,261 +424,147 @@
       messagingSenderId: "627573962958",
       appId: "1:627573962958:web:048f2577e436a30cf3389f"
     };
+    
     // Initialisation Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    // Rendre accessible globalement
-    window.auth = auth;
-    window.db = db;
-  </script>
-</head>
 
-<body>
-  <!-- CONTENEUR AVEC BORDURE GRADIENT -->
-  <div class="gradient-border p-1 rounded-xl max-w-md w-full mx-auto my-12">
-    <!-- CONTENEUR FORMULAIRE “GLASS” -->
-    <div class="form-container p-8">
-      <!-- TITRE & SOUS-TITRE -->
-      <div class="text-center mb-8">
-        <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i class="fas fa-user-plus text-indigo-600 text-3xl"></i>
-        </div>
-        <h1 class="text-3xl font-bold text-gray-800">Create an Account</h1>
-        <p class="text-gray-600 mt-2">Sign up to get started</p>
-      </div>
-
-      <!-- FORMULAIRE D'INSCRIPTION -->
-      <form id="signupForm" class="space-y-6">
-        <!-- ====== USERNAME ====== -->
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i class="fas fa-user text-gray-400"></i>
-            </div>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              required
-              class="input-field pl-10 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4"
-              placeholder="Enter your username"
-            />
-          </div>
-          <p id="usernameError" class="mt-1 text-sm text-red-600 hidden">Please enter a valid username.</p>
-        </div>
-
-        <!-- ====== EMAIL ====== -->
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i class="fas fa-envelope text-gray-400"></i>
-            </div>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              class="input-field pl-10 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4"
-              placeholder="Enter your email"
-            />
-          </div>
-          <p id="emailError" class="mt-1 text-sm text-red-600 hidden">Please enter a valid email address.</p>
-        </div>
-
-        <!-- ====== MOT DE PASSE + ICÔNE ŒIL ====== -->
-        <div>
-          <label for="pswd" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i class="fas fa-key text-gray-400"></i>
-            </div>
-            <input
-              type="password"
-              id="pswd"
-              name="password"
-              required
-              class="input-field pl-10 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4 pr-10"
-              placeholder="Enter your password"
-            />
-            <button
-              type="button"
-              id="togglePassword"
-              class="absolute inset-y-0 right-0 pr-3 flex items-center"
-            >
-              <i class="fas fa-eye text-gray-400 hover:text-gray-600" id="eyeIcon"></i>
-            </button>
-          </div>
-          <p id="passwordError" class="mt-1 text-sm text-red-600 hidden">Password must be at least 6 characters.</p>
-        </div>
-
-        <!-- ====== REMEMBER ME & FORGOT PASSWORD ====== -->
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-            />
-            <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
-          </div>
-          <div class="text-sm">
-            <a href="#" id="forgotPassword" class="font-medium text-indigo-600 hover:text-indigo-500">Forgot password?</a>
-          </div>
-        </div>
-
-        <!-- ====== BOUTON SIGN UP ====== -->
-        <div>
-          <button
-            type="submit"
-            id="submitBtn"
-            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150"
-          >
-            <span id="btnText">Sign Up</span>
-            <span id="spinner" class="ml-2 hidden">
-              <i class="fas fa-spinner fa-spin"></i>
-            </span>
-          </button>
-        </div>
-
-        <!-- ====== MESSAGE D’ERREUR GÉNÉRAL ====== -->
-        <div
-          id="errorMessage"
-          class="hidden error-message bg-red-50 border-l-4 border-red-500 p-4"
-        >
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <i class="fas fa-exclamation-circle text-red-500"></i>
-            </div>
-            <div class="ml-3">
-              <p id="errorText" class="text-sm text-red-700"></p>
-            </div>
-          </div>
-        </div>
-      </form>
-
-      <!-- ====== LIEN VERS LA PAGE DE CONNEXION ====== -->
-      <div class="mt-6 text-center text-sm text-gray-600">
-        Already have an account?
-        <a href="login.html" class="font-medium text-indigo-600 hover:text-indigo-500">Sign in</a>
-      </div>
-    </div>
-  </div>
-
-  <script>
     document.addEventListener("DOMContentLoaded", function() {
+      // Éléments du DOM
       const signupForm = document.getElementById("signupForm");
-
       const usernameInput = document.getElementById("username");
       const emailInput = document.getElementById("email");
       const passwordInput = document.getElementById("pswd");
-
       const usernameError = document.getElementById("usernameError");
       const emailError = document.getElementById("emailError");
       const passwordError = document.getElementById("passwordError");
-
       const errorMessageContainer = document.getElementById("errorMessage");
       const errorText = document.getElementById("errorText");
-
       const togglePasswordBtn = document.getElementById("togglePassword");
       const eyeIcon = document.getElementById("eyeIcon");
-
       const forgotPasswordLink = document.getElementById("forgotPassword");
       const rememberMeCheckbox = document.getElementById("remember-me");
-
-      // Toggle visibilité du mot de passe
-      togglePasswordBtn.addEventListener("click", () => {
-        const isHidden = passwordInput.type === "password";
-        passwordInput.type = isHidden ? "text" : "password";
-        eyeIcon.classList.toggle("fa-eye");
-        eyeIcon.classList.toggle("fa-eye-slash");
+      const submitBtn = document.getElementById("submitBtn");
+      const buttonText = submitBtn.querySelector(".button-text");
+      
+      // Initialisation : masquer tous les messages d'erreur
+      usernameError.style.display = "none";
+      emailError.style.display = "none";
+      passwordError.style.display = "none";
+      errorMessageContainer.style.display = "none";
+      
+      // Fonction pour afficher/masquer le mot de passe
+      togglePasswordBtn.addEventListener("click", function() {
+        const isPassword = passwordInput.type === "password";
+        passwordInput.type = isPassword ? "text" : "password";
+        eyeIcon.classList.toggle("fa-eye", !isPassword);
+        eyeIcon.classList.toggle("fa-eye-slash", isPassword);
       });
-
-      // Logique pour “Forgot password?”
-      forgotPasswordLink.addEventListener("click", (e) => {
+      
+      // Mot de passe oublié
+      forgotPasswordLink.addEventListener("click", function(e) {
         e.preventDefault();
-        // Exemple : redirection vers “reset-password.html”
-        window.location.href = "reset-password.html";
+        alert("La fonctionnalité de réinitialisation de mot de passe sera bientôt disponible !");
       });
-
+      
+      // Validation du formulaire
       signupForm.addEventListener("submit", async function(e) {
         e.preventDefault();
-
-        // Cacher tous les messages d’erreur
-        usernameError.classList.add("hidden");
-        emailError.classList.add("hidden");
-        passwordError.classList.add("hidden");
-        errorMessageContainer.classList.add("hidden");
-
-        let valid = true;
-
-        // 1) Validation du username
+        
+        // Réinitialiser les erreurs
+        usernameError.style.display = "none";
+        emailError.style.display = "none";
+        passwordError.style.display = "none";
+        errorMessageContainer.style.display = "none";
+        
+        let isValid = true;
+        
+        // Validation du nom d'utilisateur
         if (usernameInput.value.trim().length < 3) {
-          usernameError.textContent = "Username must be at least 3 characters.";
-          usernameError.classList.remove("hidden");
-          valid = false;
+          usernameError.style.display = "block";
+          isValid = false;
         }
-
-        // 2) Validation de l’email
-        const emailVal = emailInput.value.trim();
+        
+        // Validation de l'email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(emailVal)) {
-          emailError.textContent = "Please enter a valid email address.";
-          emailError.classList.remove("hidden");
-          valid = false;
+        if (!emailRegex.test(emailInput.value.trim())) {
+          emailError.style.display = "block";
+          isValid = false;
         }
-
-        // 3) Validation du mot de passe
+        
+        // Validation du mot de passe
         if (passwordInput.value.length < 6) {
-          passwordError.textContent = "Password must be at least 6 characters.";
-          passwordError.classList.remove("hidden");
-          valid = false;
+          passwordError.style.display = "block";
+          isValid = false;
         }
-
-        if (!valid) {
-          return;
-        }
-
-        // Persistance de session selon “Remember me”
-        if (rememberMeCheckbox.checked) {
-          await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-        } else {
-          await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
-        }
-
-        // Afficher le spinner et désactiver le bouton
-        document.getElementById("btnText").classList.add("hidden");
-        document.getElementById("spinner").classList.remove("hidden");
-        document.getElementById("submitBtn").disabled = true;
-
+        
+        if (!isValid) return;
+        
+        // Afficher l'indicateur de chargement
+        submitBtn.classList.add("loading");
+        submitBtn.disabled = true;
+        
         try {
-          // Création de l’utilisateur Firebase Auth
+          // Persistance de session
+          const persistence = rememberMeCheckbox.checked ? 
+            firebase.auth.Auth.Persistence.LOCAL : 
+            firebase.auth.Auth.Persistence.SESSION;
+          
+          await auth.setPersistence(persistence);
+          
+          // Création de l'utilisateur
           const userCredential = await auth.createUserWithEmailAndPassword(
-            emailVal,
+            emailInput.value.trim(),
             passwordInput.value
           );
-
-          // Enregistrer le profil utilisateur dans Firestore
+          
+          // Enregistrement des données supplémentaires dans Firestore
           await db.collection("users").doc(userCredential.user.uid).set({
             username: usernameInput.value.trim(),
             highScore: 0,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
           });
-
-          // Succès → redirection vers profile.html
+          
+          // Redirection après inscription réussie
           window.location.href = "profile.html";
+          
         } catch (error) {
-          // En cas d’erreur Firebase (ex. email déjà utilisé, etc.)
-          errorText.textContent = error.message;
-          errorMessageContainer.classList.remove("hidden");
-        } finally {
-          // Réactiver le bouton dans tous les cas
-          document.getElementById("btnText").classList.remove("hidden");
-          document.getElementById("spinner").classList.add("hidden");
-          document.getElementById("submitBtn").disabled = false;
+          // Gestion des erreurs
+          submitBtn.classList.remove("loading");
+          submitBtn.disabled = false;
+          
+          let errorMessage = "Une erreur est survenue. Veuillez réessayer.";
+          
+          switch (error.code) {
+            case "auth/email-already-in-use":
+              errorMessage = "Cette adresse e-mail est déjà utilisée.";
+              break;
+            case "auth/invalid-email":
+              errorMessage = "L'adresse e-mail est invalide.";
+              break;
+            case "auth/weak-password":
+              errorMessage = "Le mot de passe est trop faible (minimum 6 caractères).";
+              break;
+            case "auth/operation-not-allowed":
+              errorMessage = "L'opération n'est pas autorisée. Contactez le support.";
+              break;
+          }
+          
+          errorText.textContent = errorMessage;
+          errorMessageContainer.style.display = "block";
+          
+          // Animation d'erreur
+          errorMessageContainer.animate([
+            { transform: 'translateX(0px)' },
+            { transform: 'translateX(-10px)' },
+            { transform: 'translateX(10px)' },
+            { transform: 'translateX(0px)' }
+          ], {
+            duration: 400,
+            iterations: 1
+          });
         }
       });
     });
