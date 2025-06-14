@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screen Clicker Pro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #0f0c29, #302b63, #24243e);
+      color: #fff;
+    }
+    
+    /* Loading overlay */
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 10, 25, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+      transition: opacity 0.5s ease;
+    }
+    
+    .loader-container {
+      text-align: center;
+      padding: 30px;
+      border-radius: 20px;
+      background: rgba(30, 30, 50, 0.7);
+      box-shadow: 0 0 40px rgba(114, 9, 183, 0.6);
+      max-width: 90%;
+    }
+    
+    .loader-title {
+      font-size: 2.5rem;
+      margin-bottom: 25px;
+      background: linear-gradient(90deg, #f72585, #7209b7, #3a0ca3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 15px rgba(247, 37, 133, 0.5);
+    }
+    
+    .loader-bar-wrap {
+      width: 300px;
+      height: 16px;
+      background: #22223b;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 20px auto;
+      position: relative;
+    }
+    
+    .loader-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #f72585, #7209b7);
+      border-radius: 10px;
+      animation: loading 3s ease-in-out forwards;
+    }
+    
+    @keyframes loading {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    
+    /* Auth screens */
+    #authMenu, #usernamePrompt {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background: rgba(10, 10, 25, 0.95);
+      z-index: 900;
+      display: none;
+      backdrop-filter: blur(10px);
+    }
+    
+    .auth-box {
+      background: rgba(30, 30, 50, 0.8);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(114, 9, 183, 0.5);
+      text-align: center;
+      width: 90%;
+      max-width: 500px;
+    }
+    
+    .auth-title {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      background: linear-gradient(90deg, #f72585, #7209b7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .auth-btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 15px 0;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(90deg, #4a00e0, #8e2de2);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .auth-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    .auth-btn:active {
+      transform: translateY(1px);
+    }
+    
+    .google-btn {
+      background: linear-gradient(90deg, #4285F4, #34A853, #FBBC05, #EA4335);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    #usernameInput {
+      width: 100%;
+      padding: 15px;
+      margin: 20px 0;
+      border: 2px solid #4a00e0;
+      border-radius: 50px;
+      background: rgba(0, 0, 0, 0.3);
+      color: white;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+    
+    #usernameInput:focus {
+      outline: none;
+      border-color: #f72585;
+      box-shadow: 0 0 15px rgba(247, 37, 133, 0.5);
+    }
+    
+    #saveUsernameBtn {
+      background: linear-gradient(90deg, #f72585, #7209b7);
+    }
+    
+    #saveUsernameBtn:disabled {
+      background: linear-gradient(90deg, #444, #333);
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    .suggestions {
+      margin-top: 10px;
+      color: #b19dff;
+      font-size: 0.9rem;
+    }
+    
+    .suggestion-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    .suggestion {
+      padding: 5px 10px;
+      background: rgba(74, 0, 224, 0.3);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .suggestion:hover {
+      background: rgba(247, 37, 133, 0.4);
+      transform: scale(1.05);
+    }
+    
+    /* Game header */
+    #headerBar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(to right, rgba(20, 20, 40, 0.9), rgba(40, 20, 60, 0.9));
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+      transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    #headerBar.hidden {
+      transform: translateY(-100%);
+    }
+    
+    .score-section {
+      display: flex;
+      gap: 25px;
+      font-size: 1.2rem;
+    }
+    
+    .score-value {
+      color: #4facfe;
+      font-weight: bold;
+      font-size: 1.3rem;
+      text-shadow: 0 0 8px rgba(79, 172, 254, 0.5);
+    }
+    
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding-right: 60px; /* Added padding to avoid overlapping */
+    }
+    
+    #usernameWrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 15px;
+      border-radius: 50px;
+      background: rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    #usernameWrapper:hover {
+      background: rgba(74, 0, 224, 0.3);
+    }
+    
+    #usernameLabel {
+      color: #9d8dff;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    
+    #profileIcon {
+      font-size: 1.3rem;
+      color: #b19dff;
+    }
+    
+    #userAvatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: none;
+      object-fit: cover;
+    }
+    
+    /* Canvas */
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    
+    /* Combo notifications */
+    .combo-notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 20;
+      pointer-events: none;
+      max-height: 100vh;
+      overflow: hidden;
+    }
+    
+    .combo-notification {
+      background: rgba(30, 30, 50, 0.85);
+      backdrop-filter: blur(10px);
+      border-left: 4px solid #f72585;
+      border-radius: 8px;
+      padding: 16px 24px;
+      min-width: 200px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.4s ease-out forwards, fadeOut 0.4s ease-out 1.6s forwards;
+      transform: translateX(120%);
+      opacity: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .combo-notification::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #f72585, #7209b7);
+      animation: progress 2s linear forwards;
+    }
+    
+    .combo-notification.combo {
+      border-left-color: #ffcc00;
+    }
+    
+    .combo-notification.combo::before {
+      background: linear-gradient(90deg, #ffcc00, #ff9500);
+    }
+    
+    .combo-notification.level-up {
+      border-left-color: #00ffcc;
+    }
+    
+    .combo-notification.level-up::before {
+      background: linear-gradient(90deg, #00ffcc, #00b3ff);
+    }
+    
+    .combo-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .combo-title i {
+      font-size: 1.3rem;
+    }
+    
+    .combo-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 8px 0;
+      text-shadow: 0 0 10px currentColor;
+    }
+    
+    .combo-message {
+      font-size: 1rem;
+      text-align: center;
+      opacity: 0.9;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(120%); opacity: 0; }
+    }
+    
+    @keyframes progress {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    
+    /* Header toggle */
+    #headerToggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background: rgba(30, 30, 50, 0.7);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 100; /* Higher than header */
+      backdrop-filter: blur(5px);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+    }
+    
+    #headerToggle:hover {
+      transform: scale(1.1);
+      background: rgba(74, 0, 224, 0.5);
+    }
+    
+    #toggleIcon {
+      color: #9d8dff;
+      font-size: 24px;
+      transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+    
+    #headerToggle.rotated #toggleIcon {
+      transform: rotate(180deg);
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .score-section {
+        flex-direction: column;
+        gap: 8px;
+        font-size: 0.9rem;
+      }
+      
+      .score-value {
+        font-size: 1rem;
+      }
+      
+      #usernameLabel {
+        font-size: 1rem;
+      }
+      
+      .auth-box {
+        padding: 25px;
+      }
+      
+      .auth-title {
+        font-size: 1.5rem;
+      }
+      
+      #headerToggle {
+        top: 15px;
+        right: 15px;
+        width: 35px;
+        height: 35px;
+      }
+      
+      .combo-notification-container {
+        top: 80px;
+        right: 15px;
+      }
+      
+      .combo-notification {
+        min-width: 180px;
+        padding: 12px 18px;
+      }
+      
+      .combo-value {
+        font-size: 1.5rem;
+      }
+      
+      .user-section {
+        padding-right: 45px; /* Adjusted for mobile */
+      }
+    }
+    
+    /* Firebase config info */
+    .firebase-info {
+      position: fixed;
+      bottom: 15px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      color: #b19dff;
+      font-size: 0.85rem;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading overlay -->
+  <div id="loadingOverlay">
+    <div class="loader-container">
+      <div class="loader-title"><i class="fas fa-gamepad"></i> Screen Clicker Pro</div>
+      <div class="loader-bar-wrap">
+        <div class="loader-bar"></div>
+      </div>
+      <p style="margin-top: 20px; color: #b19dff;">Chargement en cours...</p>
+    </div>
+  </div>
+  
+  <!-- Authentication menu -->
+  <div id="authMenu">
+    <div class="auth-box">
+      <div class="auth-title">Screen Clicker Pro</div>
+      <p style="color: #d0d0ff; margin-bottom: 30px;">Cliquez pour marquer des points et battre les records!</p>
+      <button id="anonBtn" class="auth-btn">Jouer en anonyme</button>
+      <button id="googleLogin" class="auth-btn google-btn">
+        <i class="fab fa-google"></i> Se connecter avec Google
+      </button>
+      <button class="auth-btn" onclick="location.href='signup.html'">S'inscrire</button>
+    </div>
+  </div>
+  
+  <!-- Username prompt -->
+  <div id="usernamePrompt">
+    <div class="auth-box">
+      <div class="auth-title">Choisissez votre pseudo</div>
+      <input id="usernameInput" type="text" placeholder="Votre pseudo" maxlength="20" />
+      <div id="usernameError" style="color: #ff6b6b; margin: 10px 0; min-height: 24px;"></div>
+      <div id="suggestions" class="suggestions" style="display: none;">
+        Ce pseudo existe déjà. Suggestions:
+        <div id="suggestionList" class="suggestion-list"></div>
+      </div>
+      <button id="saveUsernameBtn" class="auth-btn" disabled>Commencer à jouer</button>
+    </div>
+  </div>
+  
+  <!-- Header toggle button -->
+  <div id="headerToggle">
+    <i id="toggleIcon" class="fas fa-caret-down"></i>
+  </div>
+  
+  <!-- Game header -->
+  <div id="headerBar" class="hidden">
+    <div class="score-section">
+      <div>Score: <span id="score" class="score-value">0</span></div>
+      <div>Votre Record: <span id="playerHighscore" class="score-value">0</span></div>
+      <div>Combo: <span id="combo" class="score-value">0x</span></div>
+    </div>
+    <div class="user-section">
+      <div id="usernameWrapper">
+        <i id="profileIcon" class="fas fa-user"></i>
+        <img id="userAvatar" src="" alt="avatar">
+        <span id="usernameLabel">Joueur</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Combo notifications container -->
+  <div class="combo-notification-container" id="notificationContainer"></div>
+  
+  <!-- Canvas -->
+  <canvas id="canvas"></canvas>
+  
+  <div class="firebase-info">
+    Connecté à Firebase | Score sauvegardé dans Firestore
+  </div>
+
+  <script>
+    // Firebase configuration - Replace with your actual config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDp5j9vNq6Z1l7gWj7l8Xq3Vv4b5n6m7o8p",
+      authDomain: "screen-clicker-pro.firebaseapp.com",
+      projectId: "screen-clicker-pro",
+      storageBucket: "screen-clicker-pro.appspot.com",
+      messagingSenderId: "123456789012",
+      appId: "1:123456789012:web:abcdefghijklmnopqrstuv"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    // Game state
+    let playerId = null;
+    let playerName = "Joueur";
+    let playerHighscore = 0;
+    let score = 0;
+    let comboCount = 0;
+    let lastClickTime = Date.now();
+    const comboTimeout = 500;
+    let rainbowMode = false;
+    let hue = 0;
+    let circles = [];
+    let particles = [];
+    const usedUsernames = new Set();
+    let lastNotificationTime = 0;
+    const notificationCooldown = 800; // Cooldown between notifications
+    
+    // DOM Elements
+    const overlay = document.getElementById('loadingOverlay');
+    const authMenu = document.getElementById('authMenu');
+    const usernamePrompt = document.getElementById('usernamePrompt');
+    const anonBtn = document.getElementById('anonBtn');
+    const googleLoginBtn = document.getElementById('googleLogin');
+    const saveBtn = document.getElementById('saveUsernameBtn');
+    const usernameInput = document.getElementById('usernameInput');
+    const usernameError = document.getElementById('usernameError');
+    const suggestionsDiv = document.getElementById('suggestions');
+    const suggestionList = document.getElementById('suggestionList');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const playerHsEl = document.getElementById('playerHighscore');
+    const comboEl = document.getElementById('combo');
+    const header = document.getElementById('headerBar');
+    const usernameLabel = document.getElementById('usernameLabel');
+    const headerToggle = document.getElementById('headerToggle');
+    const toggleIcon = document.getElementById('toggleIcon');
+    const notificationContainer = document.getElementById('notificationContainer');
+    const profileIcon = document.getElementById('profileIcon');
+    const userAvatar = document.getElementById('userAvatar');
+    
+    // Initialize game
+    async function initGame() {
+      // Check if player exists in localStorage
+      const savedPlayerId = localStorage.getItem('playerId');
+      const savedPlayerName = localStorage.getItem('playerName');
+      const savedAvatarUrl = localStorage.getItem('avatarUrl');
+      
+      if (savedPlayerId && savedPlayerName) {
+        playerId = savedPlayerId;
+        playerName = savedPlayerName;
+        playerHighscore = parseInt(localStorage.getItem('playerHighscore') || 0);
+        
+        // Check for avatar URL
+        if (savedAvatarUrl) {
+          userAvatar.src = savedAvatarUrl;
+          userAvatar.style.display = 'block';
+          profileIcon.style.display = 'none';
+        }
+        
+        setupGame();
+      } else {
+        showAuthMenu();
+      }
+      
+      // Hide loading screen
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 500);
+    }
+    
+    function showAuthMenu() {
+      overlay.style.display = 'none';
+      authMenu.style.display = 'flex';
+    }
+    
+    async function handleGoogleLogin() {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+        
+        // Store user data
+        playerId = user.uid;
+        playerName = user.displayName || "Google User";
+        
+        localStorage.setItem('playerId', playerId);
+        localStorage.setItem('playerName', playerName);
+        localStorage.setItem('avatarUrl', user.photoURL || "");
+        
+        if (user.photoURL) {
+          userAvatar.src = user.photoURL;
+          userAvatar.style.display = 'block';
+          profileIcon.style.display = 'none';
+        }
+        
+        // Create player record in Firestore
+        await db.collection('players').doc(playerId).set({
+          name: playerName,
+          highscore: playerHighscore,
+          lastPlayed: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        
+        // Hide auth menu and start game
+        authMenu.style.display = 'none';
+        setupGame();
+      } catch (error) {
+        console.error("Google login failed:", error);
+        usernameError.textContent = "Échec de la connexion Google. Essayez à nouveau.";
+      }
+    }
+    
+    async function createPlayer(name) {
+      // Reset error message
+      usernameError.textContent = '';
+      suggestionsDiv.style.display = 'none';
+      
+      // Check if username already exists
+      if (usedUsernames.has(name.toLowerCase())) {
+        usernameError.textContent = 'Ce pseudo est déjà utilisé';
+        suggestionsDiv.style.display = 'block';
+        
+        // Generate suggestions
+        suggestionList.innerHTML = '';
+        for (let i = 1; i <= 3; i++) {
+          const suggestion = document.createElement('div');
+          suggestion.className = 'suggestion';
+          suggestion.textContent = `${name}${i}`;
+          suggestion.addEventListener('click', () => {
+            usernameInput.value = suggestion.textContent;
+            usernameError.textContent = '';
+            suggestionsDiv.style.display = 'none';
+          });
+          suggestionList.appendChild(suggestion);
+        }
+        return;
+      }
+      
+      // Create new player
+      try {
+        // Simulate player creation
+        playerId = `player_${Date.now()}`;
+        playerName = name;
+        
+        localStorage.setItem('playerId', playerId);
+        localStorage.setItem('playerName', playerName);
+        
+        // Add to used usernames
+        usedUsernames.add(name.toLowerCase());
+        
+        // Create player record in Firestore
+        await db.collection('players').doc(playerId).set({
+          name: playerName,
+          highscore: 0,
+          lastPlayed: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        usernamePrompt.style.display = 'none';
+        setupGame();
+      } catch (error) {
+        console.error("Error creating player:", error);
+        usernameError.textContent = "Erreur de création de compte. Essayez un autre pseudo.";
+      }
+    }
+    
+    function setupGame() {
+      // Update UI
+      usernameLabel.textContent = playerName;
+      playerHsEl.textContent = playerHighscore;
+      
+      // Set canvas size
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      // Start game loop
+      gameLoop();
+    }
+    
+    // Circle color based on combo
+    function getCircleColor(combo) {
+      if (rainbowMode) {
+        hue = (hue + 1) % 360;
+        return `hsl(${hue}, 100%, 50%)`;
+      }
+      const colors = ['#ff6b6b', '#4ecdc4', '#ffbe0b', '#fb5607', '#ff006e', '#8338ec', '#3a86ff'];
+      return colors[Math.min(Math.floor(combo/3), colors.length-1)];
+    }
+    
+    // Draw game elements
+    function drawGame() {
+      // Clear canvas with gradient background
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, '#0a0a1a');
+      gradient.addColorStop(1, '#151530');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw circles (only one per click)
+      circles.forEach((circle, idx) => {
+        const circleColor = getCircleColor(comboCount);
+        
+        // Draw circle with glow effect
+        ctx.beginPath();
+        ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI*2);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = circleColor;
+        
+        if (circle.radius > 20) {
+          ctx.shadowColor = circleColor;
+          ctx.shadowBlur = 15;
+        }
+        
+        ctx.stroke();
+        ctx.closePath();
+        ctx.shadowBlur = 0; // Reset shadow
+        
+        // Update circle properties
+        circle.radius += 1;
+        circle.age += 1;
+        
+        // Explode circle when it reaches 50px
+        if (circle.radius >= 50) {
+          createExplosion(circle.x, circle.y, circleColor);
+          circles.splice(idx, 1);
+        }
+      });
+      
+      // Draw particles
+      particles.forEach((p, idx) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 100;
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+        
+        // Update particle
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.05; // Gravity
+        p.life -= 2;
+        p.radius = Math.max(0, p.radius - 0.1);
+        
+        // Remove dead particles
+        if (p.life <= 0 || p.radius <= 0) {
+          particles.splice(idx, 1);
+        }
+      });
+    }
+    
+    // Create explosion effect
+    function createExplosion(x, y, color) {
+      const particleCount = 20 + Math.floor(comboCount / 2);
+      
+      for (let i = 0; i < particleCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1 + Math.random() * 3 * (comboCount / 10);
+        
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: 2 + Math.random() * 4,
+          color: color,
+          life: 100
+        });
+      }
+    }
+    
+    // Create single circle on click
+    function createCircle(x, y) {
+      circles.push({ 
+        x: x, 
+        y: y, 
+        radius: 5, 
+        age: 0 
+      });
+    }
+    
+    // Show combo notification
+    function showComboNotification(combo) {
+      // Check if we should show notification
+      const now = Date.now();
+      if (now - lastNotificationTime < notificationCooldown) return;
+      lastNotificationTime = now;
+      
+      // Only show for combos 3, 5, 7, 10, and every 5 after that
+      if (combo < 3 || (combo > 3 && combo < 10 && combo % 2 === 0)) return;
+      
+      const notification = document.createElement('div');
+      notification.className = 'combo-notification combo';
+      
+      notification.innerHTML = `
+        <div class="combo-title">
+          <i class="fas fa-bolt"></i>
+          <span>COMBO ACTIVÉ!</span>
+        </div>
+        <div class="combo-value">x${combo}</div>
+        <div class="combo-message">Continuez à cliquer!</div>
+      `;
+      
+      notificationContainer.appendChild(notification);
+      
+      // Remove after animation
+      setTimeout(() => {
+        notification.remove();
+      }, 2000);
+    }
+    
+    // Show level up notification
+    function showLevelUpNotification() {
+      const notification = document.createElement('div');
+      notification.className = 'combo-notification level-up';
+      
+      notification.innerHTML = `
+        <div class="combo-title">
+          <i class="fas fa-trophy"></i>
+          <span>NIVEAU SUPÉRIEUR!</span>
+        </div>
+        <div class="combo-value">RAINBOW MODE</div>
+        <div class="combo-message">Vous avez atteint le combo x10</div>
+      `;
+      
+      notificationContainer.appendChild(notification);
+      
+      // Remove after animation
+      setTimeout(() => {
+        notification.remove();
+      }, 2000);
+    }
+    
+    // Save score to Firebase
+    async function saveScore() {
+      if (!playerId) return;
+      
+      try {
+        // Update local storage
+        localStorage.setItem('playerHighscore', playerHighscore);
+        
+        // Update Firestore
+        await db.collection('players').doc(playerId).update({
+          highscore: playerHighscore,
+          lastPlayed: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log("Score saved to Firebase!");
+      } catch (error) {
+        console.error("Error saving score:", error);
+      }
+    }
+    
+    // Handle canvas click
+    async function handleClick(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const now = Date.now();
+      
+      // Reset combo if too much time has passed
+      if (now - lastClickTime > comboTimeout) comboCount = 0;
+      comboCount++;
+      lastClickTime = now;
+      
+      // Update UI
+      comboEl.textContent = comboCount + 'x';
+      
+      // Show notifications for combos
+      if (comboCount >= 3) showComboNotification(comboCount);
+      if (comboCount === 10 && !rainbowMode) {
+        rainbowMode = true;
+        showLevelUpNotification();
+      }
+      
+      // Update score
+      score += comboCount;
+      scoreEl.textContent = score;
+      
+      // Create single circle at click position
+      createCircle(x, y);
+      
+      // Save player's highscore if new record
+      if (score > playerHighscore) {
+        playerHighscore = score;
+        playerHsEl.textContent = playerHighscore;
+        
+        // Save to Firebase
+        await saveScore();
+      }
+    }
+    
+    // Game loop
+    function gameLoop() {
+      drawGame();
+      requestAnimationFrame(gameLoop);
+    }
+    
+    // Toggle header visibility
+    function toggleHeader() {
+      header.classList.toggle('hidden');
+      headerToggle.classList.toggle('rotated');
+    }
+    
+    // Set up event listeners
+    function setupEventListeners() {
+      // UI interactions
+      anonBtn.addEventListener('click', () => {
+        authMenu.style.display = 'none';
+        usernamePrompt.style.display = 'flex';
+      });
+      
+      googleLoginBtn.addEventListener('click', handleGoogleLogin);
+      
+      usernameInput.addEventListener('input', () => {
+        const name = usernameInput.value.trim();
+        saveBtn.disabled = name === '';
+        
+        // Hide error when user types
+        if (name) {
+          usernameError.textContent = '';
+          suggestionsDiv.style.display = 'none';
+        }
+      });
+      
+      saveBtn.addEventListener('click', () => {
+        const name = usernameInput.value.trim();
+        if (name) {
+          createPlayer(name);
+        }
+      });
+      
+      // Game interactions
+      canvas.addEventListener('click', handleClick);
+      headerToggle.addEventListener('click', toggleHeader);
+      
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    }
+    
+    // Initialize game when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // Pre-populate some used usernames for demonstration
+      usedUsernames.add('gamer123');
+      usedUsernames.add('pro_player');
+      usedUsernames.add('click_master');
+      
+      setupEventListeners();
+      initGame();
+    });
+  </script>
+</body>
+</html>
